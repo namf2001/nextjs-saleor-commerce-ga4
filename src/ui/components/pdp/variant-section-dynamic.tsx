@@ -164,6 +164,19 @@ export async function VariantSectionDynamic({
 				channel,
 				value: linePrice?.amount ?? 0,
 				currency: linePrice?.currency ?? "",
+				items:
+					selectedVariant && linePrice
+						? [
+								{
+									item_id: selectedVariant.id,
+									item_name: product.name,
+									price: linePrice.amount,
+									quantity: 1,
+									item_category: product.category?.name,
+									item_variant: selectedVariant.name,
+								},
+							]
+						: undefined,
 			});
 
 			// Cart badge/drawer are cookie-gated dynamic holes — never in shared cache.
@@ -215,6 +228,22 @@ export async function VariantSectionDynamic({
 					disabledReason={disabledReason}
 					secureCheckoutLabel={secureCheckoutLabel}
 					freeShippingTrustLabel={freeShippingTrustLabel}
+					analytics={
+						selectedVariant && selectedVariant.pricing?.price?.gross
+							? {
+									channel,
+									currency: selectedVariant.pricing.price.gross.currency,
+									value: selectedVariant.pricing.price.gross.amount,
+									item: {
+										item_id: selectedVariant.id,
+										item_name: product.name,
+										price: selectedVariant.pricing.price.gross.amount,
+										item_category: product.category?.name,
+										item_variant: selectedVariant.name,
+									},
+								}
+							: undefined
+					}
 				/>
 
 				<StickyBar productName={product.name} price={price} show={!isAddToCartDisabled} />

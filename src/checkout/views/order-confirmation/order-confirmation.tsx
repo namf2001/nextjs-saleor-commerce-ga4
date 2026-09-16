@@ -6,6 +6,8 @@ import { CheckCircle, Mail, MapPin, Package, CreditCard, Truck } from "lucide-re
 import { useTranslations } from "next-intl";
 
 import { clearPaymentCompleting } from "@/checkout/lib/payment/checkout-payment-completion";
+import { claimPurchase } from "@/lib/analytics/claim";
+import { emitCommerceEvent } from "@/lib/analytics/emit.client";
 import { navigateToStorefrontHome } from "@/lib/auth";
 import { useCheckoutBrowseLocale } from "@/checkout/providers/checkout-browse";
 import { useCheckoutUser } from "@/checkout/providers/checkout-user";
@@ -79,7 +81,26 @@ export const OrderConfirmation = () => {
 		}
 
 		clearPaymentCompleting();
-	}, [order?.id]);
+
+		if (claimPurchase(order.id)) {
+			const items = order.lines?.map((line) => ({
+				item_id: line.id,
+				item_name: line.productName || "Product",
+				price: line.unitPrice?.gross?.amount ?? 0,
+				quantity: line.quantity,
+				item_variant: line.variantName || undefined,
+			}));
+
+			emitCommerceEvent({
+				name: "checkout_completed",
+				channel: order.channel?.slug ?? "",
+				value: order.total?.gross?.amount ?? 0,
+				currency: order.total?.gross?.currency ?? "",
+				transactionId: order.number || order.id,
+				items,
+			});
+		}
+	}, [order]);
 
 	if (!order) {
 		return <PageNotFound title={tErrors("orderNotFoundTitle")} message={tErrors("orderNotFoundMessage")} />;

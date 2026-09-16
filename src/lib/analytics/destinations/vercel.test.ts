@@ -63,4 +63,15 @@ describe("projectVercel", () => {
 			}),
 		).toBeNull();
 	});
+
+	it("skips product_viewed as page views cover storefront browse", () => {
+		expect(
+			projectVercel({
+				name: "product_viewed",
+				channel: "us",
+				value: 10,
+				currency: "USD",
+			}),
+		).toBeNull();
+	});
 });

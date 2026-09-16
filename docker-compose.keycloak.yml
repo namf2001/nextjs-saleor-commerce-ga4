@@ -1,0 +1,49 @@
+services:
+  keycloak-db:
+    image: postgres:16-alpine
+    container_name: saleor-keycloak-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloak_password
+    volumes:
+      - keycloak_db_data:/var/lib/postgresql/data
+    ports:
+      - "${KEYCLOAK_DB_PORT:-5434}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keycloak -d keycloak"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - keycloak-network
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.1.0
+    container_name: saleor-keycloak
+    restart: unless-stopped
+    command: start-dev
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-db:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloak_password
+      KC_HOSTNAME_STRICT: "false"
+      KC_HTTP_ENABLED: "true"
+    ports:
+      - "${KEYCLOAK_PORT:-8085}:8080"
+    depends_on:
+      keycloak-db:
+        condition: service_healthy
+    networks:
+      - keycloak-network
+
+volumes:
+  keycloak_db_data:
+
+networks:
+  keycloak-network:
+    name: saleor-keycloak-network

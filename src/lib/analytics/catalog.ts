@@ -9,18 +9,37 @@ export const PAPER_COMMERCE_EVENT_VERSION = 1 as const;
 
 export type CheckoutStepSlug = "contact" | "shipping" | "payment";
 
+export type CommerceItem = {
+	item_id: string;
+	item_name: string;
+	price?: number;
+	quantity?: number;
+	item_category?: string;
+	item_variant?: string;
+	item_brand?: string;
+};
+
 export type PaperCommerceEvent =
+	| {
+			name: "product_viewed";
+			channel: string;
+			value: number;
+			currency: string;
+			items?: CommerceItem[];
+	  }
 	| {
 			name: "product_added_to_cart";
 			channel: string;
 			value: number;
 			currency: string;
+			items?: CommerceItem[];
 	  }
 	| {
 			name: "checkout_started";
 			channel: string;
 			value: number;
 			currency: string;
+			items?: CommerceItem[];
 	  }
 	| {
 			name: "checkout_step_viewed";
@@ -34,6 +53,7 @@ export type PaperCommerceEvent =
 			currency: string;
 			/** Saleor order id — GA transaction_id later; never a Vercel property. */
 			transactionId: string;
+			items?: CommerceItem[];
 	  }
 	| {
 			name: "search_submitted";

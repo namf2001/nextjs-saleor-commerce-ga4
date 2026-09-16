@@ -27,6 +27,14 @@ export function claimBeginCheckout(
 	return claimOnce(`paper.analytics.checkout_started:${checkoutId}`, storage);
 }
 
+export function claimPurchase(
+	orderId: string,
+	storage: Pick<Storage, "getItem" | "setItem"> | null = defaultSessionStorage(),
+): boolean {
+	if (!orderId) return false;
+	return claimOnce(`paper.analytics.purchase:${orderId}`, storage);
+}
+
 export function claimSearchView(
 	href: string,
 	storage: Pick<Storage, "getItem" | "setItem"> | null = defaultSessionStorage(),

@@ -42,6 +42,12 @@ export async function logout() {
 
 	await signOutSession();
 	await clearAllSaleorAuthCookies();
+
+	for (const cookie of cookieStore.getAll()) {
+		if (cookie.name.includes("authjs") || cookie.name.includes("next-auth")) {
+			cookieStore.delete(cookie.name);
+		}
+	}
 }
 
 export async function saveCheckoutId(channel: string, checkoutId: string) {

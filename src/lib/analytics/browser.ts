@@ -152,6 +152,51 @@ export function sendRedactedPageView(): void {
 	});
 }
 
+export function setGa4User(user: { id?: string | null; name?: string | null } | null): void {
+	if (!ga4Enabled()) return;
+	if (!analyticsStorageAllowed(readConsentChoice())) return;
+	if (typeof window === "undefined") return;
+
+	const id = gaMeasurementId();
+	if (user) {
+		const userId = user.id || undefined;
+		const username = user.name || undefined;
+
+		if (userId && id) {
+			gtag("config", id, {
+				user_id: userId,
+				send_page_view: false,
+				user_properties: username ? { username } : undefined,
+			});
+			if (claimOnce(`paper.analytics.login:${userId}`)) {
+				gtag("event", "login", {
+					method: "keycloak",
+				});
+			}
+		}
+
+		if (username) {
+			gtag("set", "user_properties", {
+				username,
+			});
+		}
+
+		if (process.env.NODE_ENV === "development") {
+			console.info("[paper.analytics] setGa4User", { userId, username });
+		}
+	} else {
+		if (id) {
+			gtag("config", id, {
+				user_id: null,
+				send_page_view: false,
+			});
+		}
+		gtag("set", "user_properties", {
+			username: null,
+		});
+	}
+}
+
 function gtag(...args: unknown[]): void {
 	if (typeof window === "undefined") return;
 	if (typeof window.gtag === "function") {

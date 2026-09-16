@@ -1,7 +1,9 @@
 "use client";
 
+import { useEffect } from "react";
 import { type UserDetailsFragment } from "@/gql/graphql";
 import { useTranslations } from "next-intl";
+import { setGa4User } from "@/lib/analytics/browser";
 import { LogoutButton } from "@/lib/auth/logout-button";
 import { LinkWithChannel } from "@/ui/atoms/link-with-channel";
 import {
@@ -21,6 +23,15 @@ type Props = {
 
 export function UserMenu({ user }: Props) {
 	const t = useTranslations("nav.userMenu");
+
+	useEffect(() => {
+		const displayName =
+			[user.firstName, user.lastName].filter(Boolean).join(" ") || user.email?.split("@")[0] || user.id;
+		setGa4User({
+			id: user.id,
+			name: displayName,
+		});
+	}, [user.id, user.firstName, user.lastName, user.email]);
 
 	return (
 		<DropdownMenu modal={false}>

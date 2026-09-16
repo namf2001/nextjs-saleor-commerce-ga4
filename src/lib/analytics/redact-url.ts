@@ -25,6 +25,10 @@ const DROPPED_QUERY_PARAMS: ReadonlySet<string> = new Set([
 	"setup_intent",
 	"setup_intent_client_secret",
 	"redirect_status",
+	"code",
+	"state",
+	"session_state",
+	"iss",
 ]);
 
 /** Any param whose *name* smells like a credential is dropped regardless of the allowlist above. */

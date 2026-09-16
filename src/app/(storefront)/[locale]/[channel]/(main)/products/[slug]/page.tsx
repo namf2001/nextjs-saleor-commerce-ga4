@@ -38,6 +38,7 @@ import {
 	getDefaultGalleryImages,
 	PDP_GALLERY_LAYOUT,
 	PDP_LAYOUT_CLASSES,
+	PdpViewBeacon,
 	type Product,
 } from "@/ui/components/pdp";
 
@@ -235,6 +236,15 @@ async function ProductShell({
 			{/* Next rejects openGraph.type "product" (E237). Hoist after the product
 			    exists so missing-slug 404s never advertise og:type=product. */}
 			<meta property="og:type" content="product" />
+			<PdpViewBeacon
+				key={product.id}
+				id={product.id}
+				name={product.name}
+				channel={params.channel}
+				currency={product.pricing?.priceRange?.start?.gross?.currency || currency}
+				price={product.pricing?.priceRange?.start?.gross?.amount}
+				category={product.category?.name}
+			/>
 			<CatalogIdentityBridge
 				kind="products"
 				primarySlug={product.slug}
