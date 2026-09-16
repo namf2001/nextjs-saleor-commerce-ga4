@@ -32,6 +32,14 @@ describe("redactAnalyticsUrl", () => {
 		).toBe("https://shop.example/en/default-channel/login?confirm=1");
 	});
 
+	it("drops OAuth callback params", () => {
+		expect(
+			redactAnalyticsUrl(
+				"https://shop.example/api/auth/callback/keycloak?code=auth-code-123&state=state-456&session_state=sess-789&iss=https%3A%2F%2Fauth.example",
+			),
+		).toBe("https://shop.example/api/auth/callback/keycloak");
+	});
+
 	it("drops search terms", () => {
 		expect(
 			redactAnalyticsUrl("https://shop.example/en/default-channel/search?query=my+address&sort=price"),

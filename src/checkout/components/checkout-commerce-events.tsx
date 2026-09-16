@@ -37,13 +37,22 @@ function CheckoutCommerceEventsInner() {
 		if (lineCount === 0) return;
 		if (!claimBeginCheckout(checkoutId)) return;
 
+		const items = checkout?.lines?.map((line) => ({
+			item_id: line.variant?.id ?? line.id,
+			item_name: line.variant?.product?.name ?? line.variant?.name ?? "Product",
+			price: line.unitPrice?.gross?.amount ?? 0,
+			quantity: line.quantity,
+			item_variant: line.variant?.name,
+		}));
+
 		emitCommerceEvent({
 			name: "checkout_started",
 			channel,
 			value: checkoutValue,
 			currency: checkoutCurrency,
+			items,
 		});
-	}, [channel, checkoutCurrency, checkoutId, checkoutValue, lineCount, loadState]);
+	}, [channel, checkout?.lines, checkoutCurrency, checkoutId, checkoutValue, lineCount, loadState]);
 
 	useEffect(() => {
 		if (!checkoutId) {

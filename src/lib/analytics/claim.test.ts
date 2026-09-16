@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { claimBeginCheckout, claimOnce, claimSearchView } from "./claim";
+import { claimBeginCheckout, claimOnce, claimPurchase, claimSearchView } from "./claim";
 
 function memoryStorage(initial: Record<string, string> = {}) {
 	const data = { ...initial };
@@ -44,6 +44,28 @@ describe("claimBeginCheckout", () => {
 
 	it("does not claim an empty id", () => {
 		expect(claimBeginCheckout("", memoryStorage())).toBe(false);
+	});
+});
+
+describe("claimPurchase", () => {
+	it("allows the first claim for an order id and rejects the next", () => {
+		const storage = memoryStorage();
+		expect(claimPurchase("order-123", storage)).toBe(true);
+		expect(claimPurchase("order-123", storage)).toBe(false);
+	});
+
+	it("treats a different order as a new purchase", () => {
+		const storage = memoryStorage();
+		expect(claimPurchase("order-1", storage)).toBe(true);
+		expect(claimPurchase("order-2", storage)).toBe(true);
+	});
+
+	it("does not claim when storage is missing (SSR / blocked)", () => {
+		expect(claimPurchase("order-123", null)).toBe(false);
+	});
+
+	it("does not claim an empty id", () => {
+		expect(claimPurchase("", memoryStorage())).toBe(false);
 	});
 });
 

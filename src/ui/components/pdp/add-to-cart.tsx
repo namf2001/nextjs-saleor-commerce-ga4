@@ -5,9 +5,23 @@ import { useFormStatus } from "react-dom";
 import { useTranslations } from "next-intl";
 import { ShoppingBag } from "lucide-react";
 import { bumpChromeVersion } from "@/lib/chrome-sync";
+import { emitCommerceEvent } from "@/lib/analytics/emit.client";
 import { Button } from "@/ui/components/ui/button";
 import { DiscountPercentLabel } from "@/ui/components/ui/sale-label";
 import { cn } from "@/lib/utils";
+
+export interface AddToCartAnalytics {
+	channel: string;
+	currency: string;
+	value: number;
+	item: {
+		item_id: string;
+		item_name: string;
+		price: number;
+		item_category?: string;
+		item_variant?: string;
+	};
+}
 
 interface AddToCartProps {
 	price: string;
@@ -17,14 +31,17 @@ interface AddToCartProps {
 	disabledReason?: "no-selection" | "out-of-stock";
 	secureCheckoutLabel: string;
 	freeShippingTrustLabel?: string | null;
+	analytics?: AddToCartAnalytics;
 }
 
 function AddToCartButton({
 	disabled,
 	disabledReason,
+	analytics,
 }: {
 	disabled?: boolean;
 	disabledReason?: "no-selection" | "out-of-stock";
+	analytics?: AddToCartAnalytics;
 }) {
 	const { pending } = useFormStatus();
 	const t = useTranslations("pdp");
@@ -36,9 +53,27 @@ function AddToCartButton({
 	useEffect(() => {
 		if (wasPending.current && !pending) {
 			bumpChromeVersion();
+			if (analytics && analytics.currency) {
+				emitCommerceEvent({
+					name: "product_added_to_cart",
+					channel: analytics.channel,
+					currency: analytics.currency,
+					value: analytics.value,
+					items: [
+						{
+							item_id: analytics.item.item_id,
+							item_name: analytics.item.item_name,
+							price: analytics.item.price,
+							quantity: 1,
+							item_category: analytics.item.item_category,
+							item_variant: analytics.item.item_variant,
+						},
+					],
+				});
+			}
 		}
 		wasPending.current = pending;
-	}, [pending]);
+	}, [pending, analytics]);
 
 	const getButtonText = () => {
 		if (pending) return t("adding");
@@ -68,6 +103,7 @@ export function AddToCart({
 	disabledReason,
 	secureCheckoutLabel,
 	freeShippingTrustLabel,
+	analytics,
 }: AddToCartProps) {
 	return (
 		<div className="space-y-4">
@@ -81,7 +117,7 @@ export function AddToCart({
 				)}
 			</div>
 
-			<AddToCartButton disabled={disabled} disabledReason={disabledReason} />
+			<AddToCartButton disabled={disabled} disabledReason={disabledReason} analytics={analytics} />
 
 			<div className="flex items-center justify-center gap-6 pt-2 text-xs text-muted-foreground">
 				<span className="flex items-center gap-1.5">

@@ -9,7 +9,7 @@ export const UserAvatar = ({ user }: Props) => {
 	const label =
 		user.firstName && user.lastName
 			? `${user.firstName.slice(0, 1)}${user.lastName.slice(0, 1)}`
-			: user.email.slice(0, 2);
+			: (user.firstName || user.email).slice(0, 2);
 
 	if (user.avatar) {
 		return (

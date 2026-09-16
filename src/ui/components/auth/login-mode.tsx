@@ -4,7 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, KeyRound } from "lucide-react";
+import { signIn } from "next-auth/react";
 import { loginWithBff, syncAuthSurfacesAfterSignIn } from "@/lib/auth";
 import { buildStorefrontPath } from "@/lib/storefront-path";
 import { Button } from "@/ui/components/ui/button";
@@ -136,9 +137,32 @@ export function LoginMode() {
 					</p>
 				</div>
 
+				<div className="mb-6 space-y-4">
+					<Button
+						type="button"
+						variant="outline-solid"
+						onClick={() =>
+							void signIn("keycloak", { callbackUrl: buildStorefrontPath(params.locale, params.channel) })
+						}
+						className="flex h-12 w-full items-center justify-center gap-2 text-sm font-semibold hover:bg-secondary"
+					>
+						<KeyRound className="h-4 w-4 text-primary" />
+						Đăng nhập với Keycloak (OAuth SSO)
+					</Button>
+
+					<div className="relative my-4">
+						<div className="absolute inset-0 flex items-center">
+							<span className="w-full border-t border-border" />
+						</div>
+						<div className="relative flex justify-center text-xs uppercase">
+							<span className="bg-card px-2 text-muted-foreground">Hoặc đăng nhập bằng email</span>
+						</div>
+					</div>
+				</div>
+
 				<form onSubmit={handleLogin} className="space-y-4">
 					{error && (
-						<div role="alert" className="bg-destructive/10 rounded-md p-3 text-sm text-destructive">
+						<div role="alert" className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
 							{error}
 						</div>
 					)}

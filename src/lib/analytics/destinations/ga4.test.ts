@@ -37,6 +37,91 @@ describe("projectGa4", () => {
 		});
 	});
 
+	it("maps product_viewed to view_item and preserves items[]", () => {
+		const item = {
+			item_id: "prod_1",
+			item_name: "T-Shirt",
+			price: 25,
+			quantity: 1,
+			item_category: "Apparel",
+			item_variant: "Large",
+		};
+		expect(
+			projectGa4({
+				name: "product_viewed",
+				channel: "us",
+				value: 25,
+				currency: "USD",
+				items: [item],
+			}),
+		).toEqual({
+			name: "view_item",
+			params: {
+				currency: "USD",
+				value: 25,
+				items: [item],
+			},
+		});
+
+		expect(
+			projectGa4({
+				name: "product_viewed",
+				channel: "us",
+				value: 25,
+				currency: "",
+			}),
+		).toBeNull();
+	});
+
+	it("preserves items[] on add_to_cart, begin_checkout, and purchase", () => {
+		const item = {
+			item_id: "prod_1",
+			item_name: "T-Shirt",
+			price: 25,
+			quantity: 2,
+		};
+
+		expect(
+			projectGa4({
+				name: "product_added_to_cart",
+				channel: "us",
+				value: 50,
+				currency: "USD",
+				items: [item],
+			}),
+		).toEqual({
+			name: "add_to_cart",
+			params: { currency: "USD", value: 50, items: [item] },
+		});
+
+		expect(
+			projectGa4({
+				name: "checkout_started",
+				channel: "us",
+				value: 50,
+				currency: "USD",
+				items: [item],
+			}),
+		).toEqual({
+			name: "begin_checkout",
+			params: { currency: "USD", value: 50, items: [item] },
+		});
+
+		expect(
+			projectGa4({
+				name: "checkout_completed",
+				channel: "us",
+				value: 50,
+				currency: "USD",
+				transactionId: "ord_1",
+				items: [item],
+			}),
+		).toEqual({
+			name: "purchase",
+			params: { transaction_id: "ord_1", currency: "USD", value: 50, items: [item] },
+		});
+	});
+
 	it("skips the contact step — GA has no recommended equivalent", () => {
 		expect(projectGa4({ name: "checkout_step_viewed", channel: "us", step: "contact" })).toBeNull();
 	});

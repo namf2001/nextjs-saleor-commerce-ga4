@@ -19,6 +19,7 @@ export {
 export { ProductAttributes } from "./product-attributes";
 export { AddToCart } from "./add-to-cart";
 export { StickyBar } from "./sticky-bar";
+export { PdpViewBeacon } from "./pdp-view-beacon";
 
 // Variant Selection System
 // Re-export main components for convenient access
