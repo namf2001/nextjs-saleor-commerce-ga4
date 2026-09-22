@@ -7,7 +7,9 @@ import { auth } from "@/auth";
 import { fetchAuthenticatedUserIfSession } from "./fetch-authenticated-user";
 import { resolveSessionUser, type SessionAuthState } from "./resolve-session-user";
 
-export type HeaderUser = NonNullable<CurrentUserQuery["me"]>;
+export type HeaderUser = NonNullable<CurrentUserQuery["me"]> & {
+	authProvider?: "keycloak" | "saleor";
+};
 export type HeaderAuthState = SessionAuthState<HeaderUser>;
 
 /** Header user menu — server session (BFF cookies or Keycloak NextAuth session). */
@@ -25,6 +27,7 @@ export const getHeaderAuthState = cache(async (): Promise<HeaderAuthState> => {
 					email: nextAuthSession.user.email ?? "",
 					firstName,
 					lastName,
+					authProvider: "keycloak",
 				} as unknown as HeaderUser,
 			};
 		}
@@ -32,9 +35,21 @@ export const getHeaderAuthState = cache(async (): Promise<HeaderAuthState> => {
 		// Ignore NextAuth session read errors and fallback to Saleor session
 	}
 
-	return resolveSessionUser(() =>
+	const saleorAuth = await resolveSessionUser(() =>
 		fetchAuthenticatedUserIfSession(CurrentUserDocument, {
 			cache: "no-cache",
 		}),
 	);
+
+	if (saleorAuth.status === "authenticated") {
+		return {
+			status: "authenticated",
+			user: {
+				...saleorAuth.user,
+				authProvider: "saleor",
+			} as unknown as HeaderUser,
+		};
+	}
+
+	return saleorAuth;
 });

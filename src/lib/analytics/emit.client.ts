@@ -6,6 +6,8 @@ import type { PaperCommerceEvent } from "@/lib/analytics/catalog";
 import { projectConsole } from "@/lib/analytics/destinations/console";
 import { projectGa4 } from "@/lib/analytics/destinations/ga4";
 import { projectVercel } from "@/lib/analytics/destinations/vercel";
+import { projectUmami } from "@/lib/analytics/destinations/umami";
+import { sendUmamiEvent } from "@/lib/analytics/browser";
 
 /**
  * Client publisher. `track()` no-ops when `<WebAnalytics />` is not mounted
@@ -22,6 +24,10 @@ export function emitCommerceEvent(event: PaperCommerceEvent): void {
 		const ga4 = projectGa4(event);
 		if (ga4) {
 			sendGa4Event(ga4);
+		}
+		const umami = projectUmami(event);
+		if (umami) {
+			sendUmamiEvent(umami.name, umami.data);
 		}
 		if (process.env.NODE_ENV === "development") {
 			projectConsole(event);

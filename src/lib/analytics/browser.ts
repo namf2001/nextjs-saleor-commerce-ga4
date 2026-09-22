@@ -10,7 +10,9 @@ import {
 	parseLandingCookie,
 } from "@/lib/analytics/cookies";
 import type { Ga4Event } from "@/lib/analytics/destinations/ga4";
+import type { UmamiEventData } from "@/lib/analytics/destinations/umami";
 import { ga4Enabled, gaMeasurementId } from "@/lib/analytics/ga4";
+import { umamiEnabled } from "@/lib/analytics/umami";
 import {
 	captureLandingSnapshot,
 	landingPathFromHref,
@@ -32,6 +34,13 @@ declare global {
 		paperAnalytics?: PaperAnalyticsApi;
 		dataLayer?: unknown[];
 		gtag?: (...args: unknown[]) => void;
+		umami?: {
+			track: (eventName: string, eventData?: UmamiEventData) => void;
+			identify: (
+				sessionDataOrId?: string | Record<string, string | number | boolean>,
+				sessionData?: Record<string, string | number | boolean>,
+			) => void;
+		};
 	}
 }
 
@@ -271,4 +280,74 @@ function deleteDocumentCookie(name: string): void {
 
 function cookieSecureFlag(): string {
 	return window.location.protocol === "https:" ? "; secure" : "";
+}
+
+// Umami tracking
+export function sendUmamiEvent(name: string, data?: UmamiEventData): void {
+	if (!umamiEnabled()) return;
+	if (typeof window === "undefined" || !window.umami) return;
+	try {
+		window.umami.track(name, data);
+	} catch (err) {
+		console.warn("[analytics] umami track failed", err);
+	}
+}
+
+export type UmamiUser = {
+	id?: string | null;
+	email?: string | null;
+	name?: string | null;
+	authProvider?: string | null;
+};
+
+let lastIdentifiedUmamiId: string | null = null;
+let pendingUmamiPayload: Record<string, string | number | boolean> | null = null;
+let umamiIdentifyRetryCount = 0;
+
+function flushUmamiIdentify(): void {
+	if (typeof window === "undefined" || !pendingUmamiPayload) return;
+	if (window.umami?.identify) {
+		try {
+			window.umami.identify(pendingUmamiPayload);
+			if (process.env.NODE_ENV === "development") {
+				console.info("[paper.analytics] setUmamiUser", pendingUmamiPayload);
+			}
+			pendingUmamiPayload = null;
+			umamiIdentifyRetryCount = 0;
+		} catch (err) {
+			console.warn("[analytics] umami identify failed", err);
+		}
+		return;
+	}
+
+	if (umamiIdentifyRetryCount < 20) {
+		umamiIdentifyRetryCount++;
+		setTimeout(flushUmamiIdentify, 200);
+	}
+}
+
+export function setUmamiUser(user: UmamiUser | null): void {
+	if (!umamiEnabled()) return;
+	if (typeof window === "undefined") return;
+
+	if (!user || !user.id) {
+		lastIdentifiedUmamiId = null;
+		pendingUmamiPayload = null;
+		return;
+	}
+
+	const distinctId = user.id.slice(0, 50);
+	if (lastIdentifiedUmamiId === distinctId) return;
+	lastIdentifiedUmamiId = distinctId;
+
+	const sessionData: Record<string, string | number | boolean> = {
+		id: distinctId,
+	};
+	if (user.email) sessionData.email = user.email;
+	if (user.name) sessionData.name = user.name;
+	if (user.authProvider) sessionData.auth_provider = user.authProvider;
+
+	pendingUmamiPayload = sessionData;
+	umamiIdentifyRetryCount = 0;
+	flushUmamiIdentify();
 }
