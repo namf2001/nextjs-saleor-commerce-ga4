@@ -4,6 +4,8 @@ import { gaMeasurementId } from "@/lib/analytics/ga4";
 import { AnalyticsPathnameViews } from "@/ui/components/analytics-pathname-views";
 import { AnalyticsRuntime } from "@/ui/components/analytics-runtime";
 import { GoogleAnalytics } from "@/ui/components/google-analytics";
+import { umamiEnabled, umamiHostUrl, umamiWebsiteId } from "@/lib/analytics/umami";
+import { UmamiAnalytics } from "@/ui/components/umami-analytics";
 
 /**
  * Root-layout mount: merchant tag when a measurement id is set, plus the
@@ -20,6 +22,10 @@ export function AnalyticsMount() {
 			{measurementId ? (
 				<GoogleAnalytics measurementId={measurementId} consentMode={analyticsConsentMode()} />
 			) : null}
+
+			{/* Umami Analytics */}
+			{umamiEnabled() && <UmamiAnalytics websiteId={umamiWebsiteId()!} hostUrl={umamiHostUrl()} />}
+
 			<AnalyticsRuntime />
 			<Suspense fallback={null}>
 				<AnalyticsPathnameViews />

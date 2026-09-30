@@ -1,0 +1,42 @@
+# Patterns to ignore when packaging a Helm chart.
+# More documentation: https://helm.sh/docs/chart_template_guide/helm_ignore_file/
+
+# Version control systems
+.git/
+.gitignore
+.gitattributes
+.gitmodules
+
+# CI/CD configs
+.github/
+.gitlab-ci.yml
+.travis.yml
+.circleci/
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.bak
+*.tmp
+*.orig
+*~
+
+# OS artifacts
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Helm packaging artifacts
+*.tgz
+.helmignore
+
+# Test files and documentation artifacts
+tests/
+test/
+*.test.*
+*.spec.*

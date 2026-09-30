@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect } from "react";
-import { type UserDetailsFragment } from "@/gql/graphql";
+import { type HeaderUser } from "@/lib/auth/get-header-user";
 import { useTranslations } from "next-intl";
-import { setGa4User } from "@/lib/analytics/browser";
+import { setGa4User, setUmamiUser } from "@/lib/analytics/browser";
 import { LogoutButton } from "@/lib/auth/logout-button";
 import { LinkWithChannel } from "@/ui/atoms/link-with-channel";
 import {
@@ -18,7 +18,7 @@ import { UserInfo } from "./components/user-info";
 import { UserAvatar } from "./components/user-avatar";
 
 type Props = {
-	user: UserDetailsFragment;
+	user: HeaderUser;
 };
 
 export function UserMenu({ user }: Props) {
@@ -31,7 +31,13 @@ export function UserMenu({ user }: Props) {
 			id: user.id,
 			name: displayName,
 		});
-	}, [user.id, user.firstName, user.lastName, user.email]);
+		setUmamiUser({
+			id: user.id,
+			email: user.email,
+			name: displayName,
+			authProvider: user.authProvider || "keycloak",
+		});
+	}, [user.id, user.firstName, user.lastName, user.email, user.authProvider]);
 
 	return (
 		<DropdownMenu modal={false}>

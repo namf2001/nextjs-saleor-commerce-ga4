@@ -1,0 +1,19 @@
+apiVersion: v2
+name: umami
+description: Production-ready standalone Helm chart for Umami Analytics on Kubernetes & AWS EKS
+type: application
+version: 0.1.0
+appVersion: "v2.14.0"
+keywords:
+  - umami
+  - analytics
+  - privacy
+  - gdpr
+  - kubernetes
+  - eks
+  - aws
+home: https://umami.is
+sources:
+  - https://github.com/umami-software/umami
+maintainers:
+  - name: devops-team

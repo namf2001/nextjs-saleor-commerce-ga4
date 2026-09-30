@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { UserIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { setGa4User } from "@/lib/analytics/browser";
+import { setGa4User, setUmamiUser } from "@/lib/analytics/browser";
 import { buildStorefrontPath } from "@/lib/storefront-path";
 import { StorefrontHardLink } from "@/ui/atoms/storefront-hard-link";
 
@@ -14,6 +14,7 @@ export function UserMenuLoginLink({ locale, channel }: { locale: string; channel
 
 	useEffect(() => {
 		setGa4User(null);
+		setUmamiUser(null);
 	}, []);
 
 	return (

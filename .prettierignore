@@ -1,5 +1,7 @@
 pnpm-lock.yaml
 .next
 # Machine-written SoT — formatting is owned by formatStorefrontContentSnapshotJson
-# (JSON.stringify + tabs). Prettier collapses short arrays and breaks content:verify-seed.
 config/saleor/storefront-content.snapshot.json
+# Helm template files contain Go templating syntax which standard Prettier YAML parser cannot parse
+helm/templates/
+charts/*/templates/

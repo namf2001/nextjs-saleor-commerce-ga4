@@ -1,0 +1,38 @@
+========================================================================
+🎉 Umami Analytics has been deployed successfully!
+========================================================================
+
+1. Get the application status:
+   kubectl get pods -n {{ .Release.Namespace }} -l app.kubernetes.io/name={{ include "umami.name" . }}
+
+2. Access Umami Dashboard:
+{{- if .Values.ingress.enabled }}
+{{- range .Values.ingress.hosts }}
+   URL: https://{{ .host }}
+{{- end }}
+{{- else if contains "NodePort" .Values.service.type }}
+   Get the NodePort:
+   export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "umami.fullname" . }})
+   export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+   echo http://$NODE_IP:$NODE_PORT
+{{- else if contains "LoadBalancer" .Values.service.type }}
+   NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+   kubectl get svc --namespace {{ .Release.Namespace }} -w {{ include "umami.fullname" . }}
+{{- else if contains "ClusterIP" .Values.service.type }}
+   Port-forward locally:
+   kubectl port-forward svc/{{ include "umami.fullname" . }} 3005:{{ .Values.service.port }} -n {{ .Release.Namespace }}
+   Then visit: http://localhost:3005
+{{- end }}
+
+3. Default Credentials:
+   - Username: admin
+   - Password: umami
+   ⚠️ IMPORTANT: Please change the default password immediately in Settings > Profile!
+
+4. Connect to your Next.js Storefront:
+   - Log into Umami, add your website in Settings > Websites.
+   - Copy the Website ID.
+   - Set in your Next.js .env:
+     NEXT_PUBLIC_UMAMI_HOST_URL=https://{{ (index .Values.ingress.hosts 0).host }}
+     NEXT_PUBLIC_UMAMI_WEBSITE_ID=<YOUR_WEBSITE_ID>
+========================================================================
