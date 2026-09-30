@@ -82,7 +82,7 @@ ingress:
     alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-southeast-1:123456789012:certificate/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
     alb.ingress.kubernetes.io/healthcheck-path: /api/heartbeat
   hosts:
-    - host: analytics.vpbank.com.vn
+    - host: analytics.yourdomain.com
       paths:
         - path: /
           pathType: Prefix
@@ -128,7 +128,7 @@ Nếu bạn muốn quản lý mật khẩu hoàn toàn trên AWS Secrets Manager
    ```yaml
    awsSecretsManager:
      enabled: true
-     awsSecretName: "vpbank/production/umami"
+     awsSecretName: "app/production/umami"
      secretProviderClassName: "umami-aws-secrets"
      region: "ap-southeast-1"
    ```

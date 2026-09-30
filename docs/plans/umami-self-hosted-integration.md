@@ -47,7 +47,7 @@ services:
       - "3005:3000"
     environment:
       DATABASE_URL: postgresql://umami:umami_password_123@umami-db:5432/umami
-      APP_SECRET: vpbank_umami_secret_salt_2026
+      APP_SECRET: umami_app_secret_salt_2026
     depends_on:
       umami-db:
         condition: service_healthy
